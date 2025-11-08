@@ -1,30 +1,58 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { loginUser } from "../services/authService";
+import PasswordField from "../components/PasswordField";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [pw, setPw] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const onSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    try {
+      await loginUser(email, pw);
+      navigate("/tasks");
+    } catch (err) {
+      setError(err.message || "Login failed");
+    }
+  };
+
   return (
-    <section className="flex flex-col items-center justify-center py-20">
-      <h1 className="text-3xl font-bold mb-6">Login</h1>
-      <form className="w-full max-w-sm flex flex-col gap-4 bg-white p-6 rounded-md shadow-sm">
-        <input
-          type="email"
-          placeholder="Email"
-          className="border border-gray-300 rounded-md p-2"
-          required
+    <section className="auth">
+      <h1 className="auth__title">Login</h1>
+
+      <form className="form" onSubmit={onSubmit}>
+        <div className="form__group">
+          <label htmlFor="email" className="form__label">Email</label>
+          <input
+            id="email"
+            type="email"
+            className="input"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+
+        <PasswordField
+          id="password"
+          label="Password"
+          value={pw}
+          onChange={(e) => setPw(e.target.value)}
         />
-        <input
-          type="password"
-          placeholder="Password"
-          className="border border-gray-300 rounded-md p-2"
-          required
-        />
-        <button type="submit" className="btn w-full">Login</button>
+
+        {error && <div style={{ color: "var(--red)", fontSize: ".9rem" }}>{error}</div>}
+
+        <button type="submit" className="btn btn--block">Login</button>
       </form>
 
-      <p className="mt-4 text-sm text-gray-600">
+      <p className="auth__hint">
         Don’t have an account?{" "}
-        <Link to="/register" className="text-[var(--green)] hover:underline">
-          Register
-        </Link>
+        <Link to="/register" className="link link--accent">Register</Link>
       </p>
     </section>
   );

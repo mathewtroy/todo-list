@@ -1,8 +1,14 @@
+import { auth } from "../lib/firebase";
+
 export default function Tasks() {
+  const user = auth.currentUser;
   return (
-    <section className="text-center py-20">
-      <h1 className="text-3xl font-bold mb-4">Tasks</h1>
-      <p className="text-gray-600">Your main tasks will appear here soon.</p>
+    <section className="home">
+      <h1 className="home__title">Tasks</h1>
+      <p className="home__text">
+        Logged in as: <strong>{user?.email}</strong>
+      </p>
+      {/* TODO: task list will go here */}
     </section>
   );
 }
