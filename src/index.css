@@ -6,3 +6,54 @@ body {
   @apply text-gray-800;
   background-color: #d9d9d9;
 }
+
+:root {
+  --green: #065627;
+  --purple: #300a65;
+  --red: #940439;
+  --gray-light: #e3e3e3;
+  --gray: #d9d9d9;
+  --white: #ffffff;
+  --bg: #f8f8f5;
+  --text: #222;
+  --shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Inter", system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  border-radius: 6px;
+  color: var(--white);
+  background: var(--green);
+  transition: background 0.2s ease;
+}
+
+.btn:hover {
+  background: #048c3b;
+}
+
+

@@ -1,13 +1,33 @@
+import { Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
+import Tasks from "./pages/Tasks";
+import Completed from "./pages/Completed";
+import Trash from "./pages/Trash";
+import NotFound from "./pages/NotFound";
+import ProtectedRoute from "./routes/ProtectedRoute";
+
 export default function App() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 text-white">
-      <h1 className="text-4xl font-bold mb-4">✅ Tailwind v4 is Working!</h1>
-      <p className="text-lg text-gray-100">
-        If you see this colorful gradient, Tailwind is configured correctly 🎉
-      </p>
-      <button className="mt-6 px-6 py-2 bg-white text-blue-600 rounded-lg font-semibold hover:bg-gray-100 transition">
-        Test Button
-      </button>
+    <div className="min-h-screen bg-[var(--bg)] text-[var(--text)]">
+      <Navbar />
+      <main className="container">
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+
+          <Route element={<ProtectedRoute />}>
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/tasks/completed" element={<Completed />} />
+            <Route path="/tasks/trash" element={<Trash />} />
+          </Route>
+
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </main>
     </div>
   );
 }
