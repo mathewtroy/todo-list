@@ -5,6 +5,7 @@ import {
   updateProfile,
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
+import { sendPasswordResetEmail } from "firebase/auth";
 
 /** Register new user with email/password */
 export async function registerUser({ name, email, password, dob, phone }) {
@@ -43,4 +44,23 @@ export async function loginUser(email, password) {
 /** Logout */
 export async function logoutUser() {
   await auth.signOut();
+}
+
+export async function resetPassword(email) {
+  if (!email) throw new Error("Please enter your email");
+
+  const actionCodeSettings = {
+    url: "https://todo-krossi.web.app/login", 
+    handleCodeInApp: false                    
+  };
+
+  try {
+    await sendPasswordResetEmail(auth, email, actionCodeSettings);
+    return "Password reset email sent!";
+  } catch (err) {
+    if (err.code === "auth/user-not-found") {
+      throw new Error("No account found with this email");
+    }
+    throw new Error("Failed to send reset email");
+  }
 }

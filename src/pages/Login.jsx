@@ -1,12 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../services/authService";
+import { loginUser, resetPassword } from "../services/authService";
 import PasswordField from "../components/PasswordField";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [pw, setPw] = useState("");
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const navigate = useNavigate();
 
   const onSubmit = async (e) => {
@@ -17,6 +18,17 @@ export default function Login() {
       navigate("/tasks");
     } catch (err) {
       setError(err.message || "Login failed");
+    }
+  };
+
+  const handleResetPassword = async () => {
+    setError("");
+    setMessage("");
+    try {
+      const msg = await resetPassword(email);
+      setMessage(msg);
+    } catch (err) {
+      setError(err.message);
     }
   };
 
@@ -46,8 +58,18 @@ export default function Login() {
         />
 
         {error && <div style={{ color: "var(--red)", fontSize: ".9rem" }}>{error}</div>}
+        {message && <div style={{ color: "var(--green)", fontSize: ".9rem" }}>{message}</div>}
 
         <button type="submit" className="btn btn--block">Login</button>
+
+        <button
+          type="button"
+          onClick={handleResetPassword}
+          className="link link--accent"
+          style={{ marginTop: "10px", display: "block" }}
+        >
+          Forgot password?
+        </button>
       </form>
 
       <p className="auth__hint">
