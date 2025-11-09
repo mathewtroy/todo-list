@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { createTask } from "../services/taskService";
-import { auth } from "../lib/firebase";
+import { createTask } from "../../services/taskService";
+import { auth } from "../../lib/firebase";
 
 export default function TaskForm({ onCreated }) {
   const [title, setTitle] = useState("");
