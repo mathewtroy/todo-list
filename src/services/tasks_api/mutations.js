@@ -7,14 +7,12 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 
-/**
- * Creates a new task document
- */
-export async function create_task(db, user_id, { title, notes }) {
-  if (!user_id) throw new Error("Missing user ID");
+/** Create a new task */
+export async function createTask(db, userId, { title, notes }) {
+  if (!userId) throw new Error("Missing user ID");
   const ref = collection(db, "tasks");
   await addDoc(ref, {
-    userId: user_id,
+    userId,
     title: title.trim(),
     notes: (notes || "").trim(),
     completed: false,
@@ -24,53 +22,43 @@ export async function create_task(db, user_id, { title, notes }) {
   });
 }
 
-/**
- * Marks task as complete or incomplete
- */
-export async function complete_task(db, task_id, value) {
-  if (!task_id) return;
-  await updateDoc(doc(db, "tasks", task_id), {
+/** Mark complete/incomplete */
+export async function completeTask(db, taskId, value) {
+  if (!taskId) return;
+  await updateDoc(doc(db, "tasks", taskId), {
     completed: value,
     updatedAt: serverTimestamp(),
   });
 }
 
-/**
- * Moves task to trash (soft delete)
- */
-export async function move_to_trash(db, task_id) {
-  if (!task_id) return;
-  await updateDoc(doc(db, "tasks", task_id), {
+/** Soft delete */
+export async function moveToTrash(db, taskId) {
+  if (!taskId) return;
+  await updateDoc(doc(db, "tasks", taskId), {
     deletedAt: Date.now(),
   });
 }
 
-/**
- * Restores a task from trash
- */
-export async function restore_task(db, task_id) {
-  if (!task_id) return;
-  await updateDoc(doc(db, "tasks", task_id), {
+/** Restore task */
+export async function restoreTask(db, taskId) {
+  if (!taskId) return;
+  await updateDoc(doc(db, "tasks", taskId), {
     deletedAt: null,
     updatedAt: serverTimestamp(),
   });
 }
 
-/**
- * Updates title/notes of a task
- */
-export async function update_task(db, task_id, updates) {
-  if (!task_id || !updates) return;
-  await updateDoc(doc(db, "tasks", task_id), {
+/** Update task */
+export async function updateTask(db, taskId, updates) {
+  if (!taskId || !updates) return;
+  await updateDoc(doc(db, "tasks", taskId), {
     ...updates,
     updatedAt: serverTimestamp(),
   });
 }
 
-/**
- * Permanently deletes task
- */
-export async function delete_task(db, task_id) {
-  if (!task_id) return;
-  await deleteDoc(doc(db, "tasks", task_id));
+/** Permanently delete */
+export async function deleteTask(db, taskId) {
+  if (!taskId) return;
+  await deleteDoc(doc(db, "tasks", taskId));
 }

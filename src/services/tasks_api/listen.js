@@ -1,16 +1,14 @@
 import { onSnapshot } from "firebase/firestore";
-import { build_task_query } from "./queries";
+import { buildTaskQuery } from "./queries.js";
 
-/**
- * Subscribes to real-time updates of tasks
- */
-export function listen_tasks(db, user_id, type = "active", on_data, on_error) {
-  if (!user_id) {
-    console.warn("⚠️ listen_tasks called before user_id was set");
+/** Listen to task changes */
+export function listenTasks(db, userId, type = "active", onData, onError) {
+  if (!userId) {
+    console.warn("⚠️ listenTasks called before userId was set");
     return () => {};
   }
 
-  const q = build_task_query(db, user_id, type);
+  const q = buildTaskQuery(db, userId, type);
   if (!q) return () => {};
 
   try {
@@ -18,17 +16,17 @@ export function listen_tasks(db, user_id, type = "active", on_data, on_error) {
       q,
       (snap) => {
         const tasks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-        on_data?.(tasks);
+        onData?.(tasks);
       },
       (err) => {
         console.error("❌ onSnapshot error:", err);
-        on_error?.(err);
+        onError?.(err);
       }
     );
     return unsubscribe;
   } catch (err) {
-    console.error("❌ listen_tasks error:", err);
-    on_error?.(err);
+    console.error("❌ listenTasks error:", err);
+    onError?.(err);
     return () => {};
   }
 }

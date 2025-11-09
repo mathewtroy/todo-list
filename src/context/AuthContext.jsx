@@ -8,12 +8,11 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Single subscription for the whole app
-    const unsub = auth.onAuthStateChanged((u) => {
+    const unsubscribe = auth.onAuthStateChanged((u) => {
       setUser(u);
       setLoading(false);
     });
-    return () => unsub();
+    return () => unsubscribe();
   }, []);
 
   return (

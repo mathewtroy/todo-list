@@ -4,7 +4,11 @@ import { logoutUser } from "../services/authService";
 import logo from "../assets/todo-list-ico.svg";
 
 export default function Navbar() {
-  const user = useAuth();
+  const { user, loading } = useAuth();
+
+  const handleLogout = async () => {
+    await logoutUser();
+  };
 
   return (
     <nav className="navbar">
@@ -14,18 +18,32 @@ export default function Navbar() {
       </Link>
 
       <div className="navbar__links">
-        {user ? (
+        {loading ? (
+          // Показываем "скелет" при загрузке
+          <span className="nav-link muted">Loading...</span>
+        ) : user ? (
           <>
-            <Link to="/profile" className="nav-link">Profile</Link>
-            <Link to="/tasks" className="nav-link">Tasks</Link>
-            <button onClick={logoutUser} className="nav-link nav-link--danger">
+            <Link to="/profile" className="nav-link">
+              Profile
+            </Link>
+            <Link to="/tasks" className="nav-link">
+              Tasks
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="nav-link nav-link--danger"
+            >
               Logout
             </button>
           </>
         ) : (
           <>
-            <Link to="/login" className="nav-link">Login</Link>
-            <Link to="/register" className="nav-link">Register</Link>
+            <Link to="/login" className="nav-link">
+              Login
+            </Link>
+            <Link to="/register" className="nav-link">
+              Register
+            </Link>
           </>
         )}
       </div>

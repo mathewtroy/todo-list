@@ -1,10 +1,10 @@
-export { build_task_query } from "./queries";
-export { listen_tasks } from "./listen";
+export { buildTaskQuery } from "./queries.js";
+export { listenTasks } from "./listen.js";
 export {
-  create_task,
-  complete_task,
-  move_to_trash,
-  restore_task,
-  update_task,
-  delete_task,
-} from "./mutations";
+  createTask,
+  completeTask,
+  moveToTrash,
+  restoreTask,
+  updateTask,
+  deleteTask,
+} from "./mutations.js";

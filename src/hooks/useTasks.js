@@ -1,11 +1,8 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { listenTasks } from "../services/taskService";
 import { db } from "../lib/firebase";
-import { listen_tasks } from "../services/taskService";
 
-/**
- * Hook for real-time task subscription
- */
 export function useTasks(type = "active") {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
@@ -21,20 +18,10 @@ export function useTasks(type = "active") {
     let unsubscribe;
 
     try {
-      unsubscribe = listen_tasks(
-        db,
-        user.uid,
-        type,
-        (data) => {
-          setTasks(data);
-          setLoading(false);
-        },
-        (err) => {
-          console.error("🔥 listen_tasks error:", err);
-          setError("Failed to load tasks");
-          setLoading(false);
-        }
-      );
+      unsubscribe = listenTasks(db, user.uid, type, (data) => {
+        setTasks(data);
+        setLoading(false);
+      });
     } catch (err) {
       console.error("🔥 Error in useTasks:", err);
       setError("Failed to load tasks");

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createTask } from "../../services/taskService";
-import { auth } from "../../lib/firebase";
+import { auth, db } from "../../lib/firebase";
 
 export default function TaskForm({ onCreated }) {
   const [title, setTitle] = useState("");
@@ -15,7 +15,7 @@ export default function TaskForm({ onCreated }) {
 
     setLoading(true);
     try {
-      await createTask(user.uid, { title, notes });
+      await createTask(db, user.uid, { title, notes });
       setTitle("");
       setNotes("");
       onCreated?.();
