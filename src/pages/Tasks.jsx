@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import TaskForm from "../components/TaskForm";
+import TaskForm from "../components/tasks/TaskForm";
 
 export default function Tasks() {
   return (
@@ -15,7 +15,7 @@ export default function Tasks() {
       {/* Create Task Section */}
       <h2 className="section-title">Create Task</h2>
       <div className="form-wrapper flex justify-center">
-        <TaskForm onCreated={() => window.location.reload()} />
+        <TaskForm /> { }
       </div>
     </section>
   );

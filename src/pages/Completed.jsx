@@ -1,5 +1,5 @@
-import TaskTabs from "../components/TaskTabs";
-import TaskList from "../components/TaskList";
+import TaskTabs from "../components/tasks/TaskTabs";
+import TaskList from "../components/tasks/TaskList";
 
 export default function Completed() {
   return (
