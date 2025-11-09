@@ -11,20 +11,30 @@ export default function Register() {
   const [pw, setPw] = useState("");
   const [pw2, setPw2] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const onSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
     if (pw !== pw2) {
       setError("Passwords do not match");
       return;
     }
+
+    setLoading(true);
     try {
       await registerUser({ name, email, password: pw, dob, phone });
       navigate("/tasks");
     } catch (err) {
-      setError(err.message || "Registration failed");
+      if (err.message.includes("already registered")) {
+        setError("This email is already in use.");
+      } else {
+        setError(err.message || "Registration failed");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -98,7 +108,9 @@ export default function Register() {
 
         {error && <div style={{ color: "var(--red)", fontSize: ".9rem" }}>{error}</div>}
 
-        <button type="submit" className="btn btn--purple btn--block">Create Account</button>
+        <button type="submit" className="btn btn--purple btn--block" disabled={loading}>
+          {loading ? "Creating..." : "Create Account"}
+        </button>
       </form>
 
       <p className="auth__hint">

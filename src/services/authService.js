@@ -2,34 +2,45 @@ import { auth, db } from "../lib/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
-  signOut,
   updateProfile,
 } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
 
+/** Register new user with email/password */
 export async function registerUser({ name, email, password, dob, phone }) {
-  const cred = await createUserWithEmailAndPassword(auth, email, password);
+  try {
+    // create user in Firebase Auth
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
 
-  await updateProfile(cred.user, { displayName: name });
+    // set display name
+    await updateProfile(cred.user, { displayName: name });
 
-  const uid = cred.user.uid;
-  await setDoc(doc(db, "users", uid), {
-    uid,
-    name,
-    email,
-    dob: dob || null,
-    phone: phone || null,
-    role: "user",              
-    createdAt: serverTimestamp(),
-  });
+    // create Firestore user doc
+    const userRef = doc(db, "users", cred.user.uid);
+    await setDoc(userRef, {
+      name,
+      email: email.toLowerCase(),
+      dob: dob || null,
+      phone: phone || null,
+      role: "user",
+      createdAt: new Date().toISOString(),
+    });
 
-  return cred.user;
+    return cred.user;
+  } catch (err) {
+    if (err.code === "auth/email-already-in-use") {
+      throw new Error("This email is already registered");
+    }
+    throw err;
+  }
 }
 
-export function loginUser(email, password) {
+/** Login existing user */
+export async function loginUser(email, password) {
   return signInWithEmailAndPassword(auth, email, password);
 }
 
-export function logoutUser() {
-  return signOut(auth);
+/** Logout */
+export async function logoutUser() {
+  await auth.signOut();
 }
