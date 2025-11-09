@@ -1,23 +1,26 @@
 import { db } from "../lib/firebase";
 import {
-  collection,
   addDoc,
+  collection,
+  doc,
   updateDoc,
   deleteDoc,
-  doc,
-  serverTimestamp,
+  onSnapshot,
   query,
   where,
   orderBy,
-  getDocs,
+  serverTimestamp,
 } from "firebase/firestore";
 
-/* Create new task */
-export async function createTask(userId, data) {
-  return addDoc(collection(db, "tasks"), {
+// --- Create Task ---
+export async function createTask(userId, { title, notes }) {
+  if (!userId) throw new Error("Missing user ID");
+
+  const ref = collection(db, "tasks");
+  await addDoc(ref, {
     userId,
-    title: data.title,
-    notes: data.notes || "",
+    title: title.trim(),
+    notes: notes.trim() || "",
     completed: false,
     deletedAt: null,
     createdAt: serverTimestamp(),
@@ -25,79 +28,102 @@ export async function createTask(userId, data) {
   });
 }
 
-/* Update or edit task */
-export async function editTask(taskId, updates) {
+// --- Real-time listener ---
+export function listenTasks(userId, type = "active", callback) {
+  if (!userId) {
+    console.warn("⚠️ listenTasks called before userId was set");
+    return () => {}; // return dummy unsubscribe
+  }
+
+  const ref = collection(db, "tasks");
+  let q = null;
+
+  switch (type) {
+    case "active":
+      q = query(
+        ref,
+        where("userId", "==", userId),
+        where("completed", "==", false),
+        where("deletedAt", "==", null),
+        orderBy("createdAt", "desc")
+      );
+      break;
+
+    case "completed":
+      q = query(
+        ref,
+        where("userId", "==", userId),
+        where("completed", "==", true),
+        where("deletedAt", "==", null),
+        orderBy("updatedAt", "desc")
+      );
+      break;
+
+    case "deleted":
+    case "trash":
+      q = query(
+        ref,
+        where("userId", "==", userId),
+        where("deletedAt", ">", 0),
+        orderBy("deletedAt", "desc")
+      );
+      break;
+
+    default:
+      console.warn("⚠️ Unknown task type:", type);
+      return () => {};
+  }
+
+  try {
+    const unsubscribe = onSnapshot(q, (snap) => {
+      const tasks = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      callback(tasks);
+    });
+    return unsubscribe;
+  } catch (err) {
+    console.error("❌ listenTasks error:", err);
+    return () => {};
+  }
+}
+
+// --- Update & Delete ---
+export async function completeTask(taskId, value) {
+  if (!taskId) return;
   const ref = doc(db, "tasks", taskId);
-  return updateDoc(ref, {
-    ...updates,
+  await updateDoc(ref, {
+    completed: value,
     updatedAt: serverTimestamp(),
   });
 }
 
-/* Mark task as completed */
-export async function completeTask(taskId, done = true) {
-  const ref = doc(db, "tasks", taskId);
-  return updateDoc(ref, {
-    completed: done,
-    updatedAt: serverTimestamp(),
-  });
-}
-
-/* Move to trash (soft delete) */
 export async function moveToTrash(taskId) {
+  if (!taskId) return;
   const ref = doc(db, "tasks", taskId);
-  return updateDoc(ref, {
+  await updateDoc(ref, {
     deletedAt: Date.now(),
-    updatedAt: serverTimestamp(),
   });
 }
 
-/* Restore from trash */
 export async function restoreTask(taskId) {
+  if (!taskId) return;
   const ref = doc(db, "tasks", taskId);
-  return updateDoc(ref, {
+  await updateDoc(ref, {
     deletedAt: null,
     updatedAt: serverTimestamp(),
   });
 }
 
-/* Permanently delete */
+export async function updateTask(taskId, updates) {
+  if (!taskId || !updates) return;
+  const ref = doc(db, "tasks", taskId);
+  await updateDoc(ref, {
+    ...updates,
+    updatedAt: serverTimestamp(),
+  });
+}
+
+
 export async function deleteTask(taskId) {
-  return deleteDoc(doc(db, "tasks", taskId));
-}
-
-/* Queries */
-export async function getActiveTasks(userId) {
-  const q = query(
-    collection(db, "tasks"),
-    where("userId", "==", userId),
-    where("completed", "==", false),
-    where("deletedAt", "==", null),
-    orderBy("createdAt", "desc")
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-}
-
-export async function getCompletedTasks(userId) {
-  const q = query(
-    collection(db, "tasks"),
-    where("userId", "==", userId),
-    where("completed", "==", true),
-    where("deletedAt", "==", null),
-    orderBy("updatedAt", "desc")
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-}
-
-export async function getTrashedTasks(userId) {
-  const q = query(
-    collection(db, "tasks"),
-    where("userId", "==", userId),
-    where("deletedAt", ">", 0),
-    orderBy("deletedAt", "desc")
-  );
-  const snap = await getDocs(q);
-  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  if (!taskId) return;
+  await deleteDoc(doc(db, "tasks", taskId));
 }
