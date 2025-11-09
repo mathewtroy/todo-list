@@ -1,5 +1,5 @@
+import TaskTabs from "../components/TaskTabs";
 import TaskList from "../components/TaskList";
-import { Link } from "react-router-dom";
 
 export default function Completed() {
   return (
@@ -7,18 +7,8 @@ export default function Completed() {
       <h1 className="page-title">Completed Tasks</h1>
       <p className="page-subtitle">Here are your finished tasks.</p>
 
-      <div className="card">
-        <div className="tabs" style={{ marginBottom: ".5rem" }}>
-          <Link to="/tasks/active" className="tab">
-            Active
-          </Link>
-          <Link to="/tasks/completed" className="tab tab--active">
-            Completed
-          </Link>
-          <Link to="/tasks/deleted" className="tab">
-            Deleted
-          </Link>
-        </div>
+      <div className="section card">
+        <TaskTabs />
         <TaskList type="completed" />
       </div>
     </section>

@@ -1,6 +1,5 @@
-import TaskForm from "../components/TaskForm";
+import TaskTabs from "../components/TaskTabs";
 import TaskList from "../components/TaskList";
-import { Link } from "react-router-dom";
 
 export default function Active() {
   return (
@@ -9,17 +8,7 @@ export default function Active() {
       <p className="page-subtitle">Manage your current tasks.</p>
 
       <div className="section card">
-        <div className="tabs" style={{ marginBottom: ".5rem" }}>
-          <Link to="/tasks/active" className="tab tab--active">
-            Active
-          </Link>
-          <Link to="/tasks/completed" className="tab">
-            Completed
-          </Link>
-          <Link to="/tasks/deleted" className="tab">
-            Deleted
-          </Link>
-        </div>
+        <TaskTabs />
         <TaskList type="active" />
       </div>
     </section>
