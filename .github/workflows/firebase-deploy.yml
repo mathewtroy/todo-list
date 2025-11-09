@@ -35,7 +35,6 @@ jobs:
 
   deploy:
     name: Deploy to Firebase Hosting
-    # deploy only for push to main and only if CI passed
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: ci
     runs-on: ubuntu-latest
@@ -57,8 +56,9 @@ jobs:
         run: npm run build
 
       - name: Deploy to Firebase Hosting
-        uses: w9jds/firebase-action@v12
+        uses: FirebaseExtended/action-hosting-deploy@v0
         with:
-          args: deploy --only hosting
-        env:
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_DEPLOY_TOKEN }}
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT_TODO_KROSSI }}"
+          channelId: live
+          projectId: todo-krossi
