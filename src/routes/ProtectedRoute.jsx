@@ -1,23 +1,11 @@
-import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../lib/firebase";
+// src/routes/ProtectedRoute.jsx
 import { Navigate, Outlet } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 export default function ProtectedRoute() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useAuth();
 
-  // Listen to auth state
-  useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-      setLoading(false);
-    });
-    return () => unsub();
-  }, []);
+  if (loading) return null; // можно вставить Loader
 
-  if (loading) return null; // Wait for Firebase to check user
-
-  // Redirect to login if no user
   return user ? <Outlet /> : <Navigate to="/login" replace />;
 }
