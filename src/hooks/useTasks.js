@@ -1,33 +1,50 @@
 import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "../lib/firebase";
-import { listenTasks } from "../services/taskService";
+import { useAuth } from "../context/AuthContext";
+import { db } from "../lib/firebase";
+import { listen_tasks } from "../services/taskService";
 
+/**
+ * Hook for real-time task subscription
+ */
 export function useTasks(type = "active") {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [userId, setUserId] = useState(null);
+  const [error, setError] = useState(null);
 
-  // Listen to auth state (safe way)
   useEffect(() => {
-    const unsubAuth = onAuthStateChanged(auth, (user) => {
-      setUserId(user ? user.uid : null);
-    });
-    return unsubAuth;
-  }, []);
-
-  // Listen to Firestore tasks
-  useEffect(() => {
-    if (!userId) return;
+    if (!user) return;
 
     setLoading(true);
-    const unsubTasks = listenTasks(userId, type, (data) => {
-      setTasks(data);
+    setError(null);
+
+    let unsubscribe;
+
+    try {
+      unsubscribe = listen_tasks(
+        db,
+        user.uid,
+        type,
+        (data) => {
+          setTasks(data);
+          setLoading(false);
+        },
+        (err) => {
+          console.error("🔥 listen_tasks error:", err);
+          setError("Failed to load tasks");
+          setLoading(false);
+        }
+      );
+    } catch (err) {
+      console.error("🔥 Error in useTasks:", err);
+      setError("Failed to load tasks");
       setLoading(false);
-    });
+    }
 
-    return () => unsubTasks();
-  }, [userId, type]);
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
+  }, [user, type]);
 
-  return { tasks, loading };
+  return { tasks, loading, error };
 }
