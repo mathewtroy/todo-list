@@ -6,6 +6,7 @@ import {
   deleteTask,
   updateTask,
 } from "../../services/taskService";
+import { db } from "../../lib/firebase";
 import TaskView from "./TaskView";
 import TaskEditor from "./TaskEditor";
 import TaskActions from "./TaskActions";
@@ -16,18 +17,27 @@ export default function TaskItem({ task }) {
   const [notesEdit, setNotesEdit] = useState(task.notes || "");
   const [saving, setSaving] = useState(false);
 
-  const handleToggleComplete = async () => await completeTask(task.id, !task.completed);
-  const handleSoftDelete = async () => await moveToTrash(task.id);
-  const handleRestore = async () => await restoreTask(task.id);
-  const handleHardDelete = async () => await deleteTask(task.id);
+  const handleToggleComplete = async () =>
+    await completeTask(db, task.id, !task.completed);
+
+  const handleSoftDelete = async () =>
+    await moveToTrash(db, task.id);
+
+  const handleRestore = async () =>
+    await restoreTask(db, task.id);
+
+  const handleHardDelete = async () =>
+    await deleteTask(db, task.id);
 
   const handleSave = async () => {
     if (!titleEdit.trim()) return;
     setSaving(true);
-    await updateTask(task.id, {
+
+    await updateTask(db, task.id, {
       title: titleEdit.trim(),
       notes: notesEdit.trim(),
     });
+
     setSaving(false);
     setEditing(false);
   };
